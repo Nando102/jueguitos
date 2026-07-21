@@ -1,3 +1,3 @@
 Tutorial:
 
-Descargue los archivos space iñeiders y personajes space iñeiders, abralos en un editor de codigo e inicie el que se llama space iñeiders
+Descargue los archivos, abralos en su editor de código de preferencia e inicie el llamado space invaders
