@@ -42,7 +42,7 @@ try:
     RAW_BIRD_IMG = pygame.image.load("pajaro.png").convert_alpha()
     BIRD_IMG = pygame.transform.scale(RAW_BIRD_IMG, (BIRD_WIDTH, BIRD_HEIGHT))
 
-    RAW_PIPE_IMG = pygame.image.load("tubo.png").convert_alpha()
+    RAW_PIPE_IMG = pygame.image.load("tuberia.png").convert_alpha()
     
     BG_IMG = pygame.image.load("fondo.jpg").convert()
     BG_IMG = pygame.transform.scale(BG_IMG, (WIDTH, HEIGHT))
@@ -82,8 +82,12 @@ class Pipe:
         self.x = WIDTH
         
         dynamic_margin = max(20, 100 - (score * 5))
-        min_top = dynamic_margin
-        max_top = HEIGHT - PIPE_GAP - dynamic_margin
+        
+        # Margen de seguridad para que la boquilla no quede cortada ni flotando fuera de la pantalla
+        boquilla_alto = 70 
+        
+        min_top = dynamic_margin + boquilla_alto
+        max_top = HEIGHT - PIPE_GAP - dynamic_margin - boquilla_alto
         
         if min_top >= max_top:
             min_top = 20
@@ -108,22 +112,19 @@ class Pipe:
         surface = pygame.Surface((PIPE_WIDTH, target_height), pygame.SRCALPHA)
         
         base_w = PIPE_WIDTH
-        base_h = int(RAW_PIPE_IMG.get_height() * (PIPE_WIDTH / RAW_PIPE_IMG.get_width()))
+        raw_h = RAW_PIPE_IMG.get_height()
+        raw_w = RAW_PIPE_IMG.get_width()
+        
+        base_h = int(raw_h * (PIPE_WIDTH / raw_w))
         scaled_base = pygame.transform.scale(RAW_PIPE_IMG, (base_w, base_h))
         
-        if inverted:
-            scaled_base = pygame.transform.flip(scaled_base, False, True)
-
         current_y = 0
+        while current_y < target_height:
+            surface.blit(scaled_base, (0, current_y))
+            current_y += base_h
+            
         if inverted:
-            current_y = target_height - base_h
-            while current_y > -base_h:
-                surface.blit(scaled_base, (0, current_y))
-                current_y -= base_h
-        else:
-            while current_y < target_height:
-                surface.blit(scaled_base, (0, current_y))
-                current_y += base_h
+            surface = pygame.transform.flip(surface, False, True)
                 
         mask = pygame.mask.from_surface(surface)
         return surface, mask
@@ -152,7 +153,6 @@ class Pipe:
 
 def start_menu_music():
     try:
-        # Asegúrate de tener un archivo llamado "menu.mp3" para la pantalla de inicio
         pygame.mixer.music.load("menu.mp3")
         pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.play(-1)
@@ -161,7 +161,6 @@ def start_menu_music():
 
 def start_game_music():
     try:
-        # Asegúrate de tener un archivo llamado "musica.mp3" para cuando estés jugando
         pygame.mixer.music.load("theme.mp3")
         pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.play(-1)
@@ -183,7 +182,7 @@ def main_menu():
     title_font = pygame.font.SysFont("arial", 70, bold=True)
     instruction_font = pygame.font.SysFont("arial", 40, bold=True)
     
-    start_menu_music() # Reproduce la música exclusiva del menú principal
+    start_menu_music() 
     high_score = load_high_score()
 
     while True:
@@ -196,7 +195,7 @@ def main_menu():
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    start_game_music() # Cambia a la música del juego al presionar espacio
+                    start_game_music() 
                     return 
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
@@ -218,7 +217,7 @@ def main_menu():
         WIN.blit(record_text, (WIDTH // 2 - record_shadow.get_width() // 2, 300))
 
         WIN.blit(play_shadow, (WIDTH // 2 - play_shadow.get_width() // 2 + 2, 423))
-        WIN.blit(play_text, (WIDTH // 2 - play_shadow.get_width() // 2, 420))
+        WIN.blit(play_text, (WIDTH // 2 - play_text.get_width() // 2, 420))
 
         pygame.display.update()
 
@@ -256,7 +255,7 @@ def game_over_screen(score):
         record_text = instruction_font.render(f"Récord actual: {high_score}", True, (255, 215, 0))
 
         WIN.blit(go_shadow, (WIDTH // 2 - go_shadow.get_width() // 2 + 3, 183))
-        WIN.blit(go_text, (WIDTH // 2 - go_text.get_width() // 2, 180))
+        WIN.blit(go_text, (WIDTH // 2 - go_shadow.get_width() // 2, 180))
 
         WIN.blit(score_shadow, (WIDTH // 2 - score_shadow.get_width() // 2 + 2, 303))
         WIN.blit(score_text, (WIDTH // 2 - score_shadow.get_width() // 2, 300))
